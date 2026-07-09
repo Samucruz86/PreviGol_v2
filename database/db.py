@@ -22,10 +22,14 @@ DATABASE = os.path.join(
 )
 
 
-def criar_base_dados():
+def ligar_bd():
 
-    conn = sqlite3.connect(DATABASE)
+    return sqlite3.connect(DATABASE)
 
+
+def criar_tabelas():
+
+    conn = ligar_bd()
     cursor = conn.cursor()
 
 
@@ -34,9 +38,11 @@ def criar_base_dados():
 
         id INTEGER PRIMARY KEY AUTOINCREMENT,
 
-        nome TEXT UNIQUE,
+        nome TEXT UNIQUE NOT NULL,
 
         liga TEXT,
+
+        pais TEXT,
 
         elo REAL DEFAULT 1500
 
@@ -49,6 +55,8 @@ def criar_base_dados():
 
         id INTEGER PRIMARY KEY AUTOINCREMENT,
 
+        data TEXT,
+
         equipa_casa TEXT,
 
         equipa_fora TEXT,
@@ -57,9 +65,7 @@ def criar_base_dados():
 
         golos_fora INTEGER,
 
-        data TEXT,
-
-        estado TEXT
+        estado TEXT DEFAULT 'agendado'
 
     )
     """)
@@ -78,11 +84,15 @@ def criar_base_dados():
 
         golos_sofridos INTEGER DEFAULT 0,
 
+        media_marcados REAL DEFAULT 0,
+
+        media_sofridos REAL DEFAULT 0,
+
         media_casa REAL DEFAULT 0,
 
         media_fora REAL DEFAULT 0,
 
-        forma REAL DEFAULT 0
+        forma TEXT
 
     )
     """)
@@ -94,6 +104,8 @@ def criar_base_dados():
         id INTEGER PRIMARY KEY AUTOINCREMENT,
 
         jogo_id INTEGER,
+
+        data_previsao TEXT,
 
         xg_casa REAL,
 
@@ -122,7 +134,11 @@ def criar_base_dados():
 
         resultado_real TEXT,
 
-        acertou INTEGER
+        acertou_resultado INTEGER,
+
+        acertou_over25 INTEGER,
+
+        acertou_ambas INTEGER
 
     )
     """)
@@ -134,6 +150,6 @@ def criar_base_dados():
 
 if __name__ == "__main__":
 
-    criar_base_dados()
+    criar_tabelas()
 
-    print("Base de dados criada com sucesso")
+    print("Base de dados PreviGol criada com sucesso")
