@@ -35,10 +35,18 @@ def gerar_previsao(
 
     xg = calcular_xg(
 
-    dados_casa["media_casa"],
-    dados_casa["golos_sofridos"],
-    dados_fora["media_fora"],
-    dados_fora["golos_sofridos"]
+        dados_casa["media_marcados_casa"],
+
+        dados_casa["media_sofridos_casa"],
+
+        dados_fora["media_marcados_fora"],
+
+        dados_fora["media_sofridos_fora"],
+
+        dados_casa["forma"],
+
+        dados_fora["forma"]
+
     )
 
 
