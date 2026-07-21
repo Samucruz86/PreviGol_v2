@@ -22,6 +22,10 @@ def obter_estatisticas_equipa(equipa):
             golos_sofridos,
             media_casa,
             media_fora,
+            media_marcados_casa,
+            media_sofridos_casa,
+            media_marcados_fora,
+            media_sofridos_fora,
             forma
         FROM estatisticas_equipas
         WHERE equipa = ?
@@ -50,8 +54,20 @@ def obter_estatisticas_equipa(equipa):
             "media_fora":
                 dados[3],
 
+            "media_marcados_casa":
+                dados[4],
+
+            "media_sofridos_casa":
+                dados[5],
+
+            "media_marcados_fora":
+                dados[6],
+
+            "media_sofridos_fora":
+                dados[7],
+
             "forma":
-                dados[4]
+                dados[8]
 
         }
 
@@ -68,11 +84,19 @@ def obter_estatisticas_equipa(equipa):
 
         "media_fora": 1.2,
 
+        "media_marcados_casa": 1.5,
+
+        "media_sofridos_casa": 1.2,
+
+        "media_marcados_fora": 1.2,
+
+        "media_sofridos_fora": 1.5,
+
         "forma": 5
 
     }
 
-
+    
 def obter_ultimos_jogos(equipa, limite=5):
     """
     Obtém últimos jogos de uma equipa.
