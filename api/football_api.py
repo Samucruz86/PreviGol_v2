@@ -1,6 +1,6 @@
 """
 Ligação à API-Football
-PreviGol v0.7
+PreviGol v0.7.2
 """
 
 import os
@@ -8,7 +8,7 @@ import sys
 import requests
 
 
-# permite importar ficheiros da raiz do projeto
+# Permite importar ficheiros da raiz do projeto
 
 BASE_DIR = os.path.dirname(
     os.path.dirname(
@@ -24,6 +24,9 @@ from config import API
 
 
 def testar_ligacao():
+    """
+    Testa a ligação à API-Football.
+    """
 
     url = API["url"] + "/status"
 
@@ -45,8 +48,53 @@ def testar_ligacao():
 
 
 
+def obter_jogos(data):
+    """
+    Obtém jogos de uma determinada data.
+    """
+
+    url = API["url"] + "/fixtures"
+
+
+    headers = {
+
+        "x-apisports-key": API["key"]
+
+    }
+
+
+    parametros = {
+
+        "date": data
+
+    }
+
+
+    resposta = requests.get(
+        url,
+        headers=headers,
+        params=parametros
+    )
+
+
+    return resposta.json()
+
+
+
 if __name__ == "__main__":
 
-    resultado = testar_ligacao()
 
-    print(resultado)
+    print("Teste de ligação API:")
+    
+    estado = testar_ligacao()
+
+    print(estado)
+
+
+    print("\nJogos do dia:")
+
+    jogos = obter_jogos(
+        "2026-07-21"
+    )
+
+    print(jogos)
