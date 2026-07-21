@@ -69,14 +69,31 @@ def gerar_previsao(
 
 
 
-    confianca = max(
+    xg_total = xg_casa + xg_fora
 
-        resultado["vitoria_casa"],
 
-        resultado["empate"],
+    confianca = (
 
-        resultado["vitoria_fora"]
+        mercados["over25"] * 0.40
 
+        +
+
+        mercados["ambas_marcam"] * 0.30
+
+        +
+
+        min(xg_total * 10, 100) * 0.20
+
+        +
+
+        ((dados_casa["forma"] + dados_fora["forma"]) / 2) * 0.10
+
+    )
+
+
+    confianca = round(
+        min(confianca, 100),
+        2
     )
 
 
@@ -120,7 +137,17 @@ def gerar_previsao(
             mercados["ambas_marcam"],
 
         "confianca":
-            round(confianca,2)
+            round(confianca,2),
+        
+        "nivel":
+
+            "Alta"
+            if confianca >= 70
+            else
+            "Média"
+            if confianca >= 50
+            else
+            "Baixa"
 
     }
 
