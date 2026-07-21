@@ -1,3 +1,7 @@
+"""
+Gestão da Base de Dados PreviGol v2
+"""
+
 import sqlite3
 import os
 
@@ -8,12 +12,17 @@ BASE_DIR = os.path.dirname(
     )
 )
 
+
 DATA_DIR = os.path.join(
     BASE_DIR,
     "data"
 )
 
-os.makedirs(DATA_DIR, exist_ok=True)
+
+os.makedirs(
+    DATA_DIR,
+    exist_ok=True
+)
 
 
 DATABASE = os.path.join(
@@ -22,9 +31,13 @@ DATABASE = os.path.join(
 )
 
 
+
 def ligar_bd():
 
-    return sqlite3.connect(DATABASE)
+    return sqlite3.connect(
+        DATABASE
+    )
+
 
 
 def criar_tabelas():
@@ -32,6 +45,8 @@ def criar_tabelas():
     conn = ligar_bd()
     cursor = conn.cursor()
 
+
+    # Equipas
 
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS equipas (
@@ -50,12 +65,13 @@ def criar_tabelas():
     """)
 
 
+
+    # Jogos
+
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS jogos (
 
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-
-        data TEXT,
 
         equipa_casa TEXT,
 
@@ -65,11 +81,16 @@ def criar_tabelas():
 
         golos_fora INTEGER,
 
-        estado TEXT DEFAULT 'agendado'
+        data TEXT,
+
+        estado TEXT
 
     )
     """)
 
+
+
+    # Estatísticas
 
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS estatisticas_equipas (
@@ -84,32 +105,33 @@ def criar_tabelas():
 
         golos_sofridos INTEGER DEFAULT 0,
 
-        media_marcados REAL DEFAULT 0,
-
-        media_sofridos REAL DEFAULT 0,
-
         media_casa REAL DEFAULT 0,
 
         media_fora REAL DEFAULT 0,
 
-        forma TEXT
+        forma REAL DEFAULT 0
 
     )
     """)
 
+
+
+    # Previsões
 
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS previsoes (
 
         id INTEGER PRIMARY KEY AUTOINCREMENT,
 
-        jogo_id INTEGER,
+        equipa_casa TEXT,
 
-        data_previsao TEXT,
+        equipa_fora TEXT,
 
         xg_casa REAL,
 
         xg_fora REAL,
+
+        resultado_previsto TEXT,
 
         over15 REAL,
 
@@ -117,13 +139,20 @@ def criar_tabelas():
 
         ambas_marcam REAL,
 
-        resultado_previsto TEXT,
+        confianca REAL,
 
-        confianca REAL
+        mercado_recomendado TEXT,
+
+        probabilidade_mercado REAL,
+
+        comentario_analise TEXT
 
     )
     """)
 
+
+
+    # Avaliações
 
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS avaliacao_previsoes (
@@ -134,7 +163,9 @@ def criar_tabelas():
 
         resultado_real TEXT,
 
-        acertou_resultado INTEGER,
+        acertou INTEGER,
+
+        acertou_over15 INTEGER,
 
         acertou_over25 INTEGER,
 
@@ -144,12 +175,16 @@ def criar_tabelas():
     """)
 
 
+
     conn.commit()
     conn.close()
+
 
 
 if __name__ == "__main__":
 
     criar_tabelas()
 
-    print("Base de dados PreviGol criada com sucesso")
+    print(
+        "Base de dados PreviGol criada/verificada com sucesso"
+    )
