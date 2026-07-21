@@ -1,5 +1,8 @@
 import os
 
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Diretório principal do projeto
 
@@ -46,6 +49,19 @@ TELEGRAM = {
         "TELEGRAM_TOKEN",
         ""
     )
+
+}
+
+# API Football
+
+API = {
+
+    "key": os.getenv(
+        "API_FOOTBALL_KEY",
+        ""
+    ),
+
+    "url": "https://v3.football.api-sports.io"
 
 }
 
