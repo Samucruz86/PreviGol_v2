@@ -1,0 +1,16 @@
+# Bases de dados SQLite
+data/*.db
+
+# Ficheiros temporários Python
+__pycache__/
+*.pyc
+
+# Ambientes virtuais
+venv/
+.env
+
+# Ficheiros do sistema
+.DS_Store
+
+# Logs
+*.log

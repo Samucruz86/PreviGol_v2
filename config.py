@@ -67,3 +67,11 @@ LIGAS_SUPORTADAS = [
     "França"
 
 ]
+
+# Informações do projeto
+
+NOME_PROJETO = "PreviGol"
+VERSAO = "0.6.0"
+
+# Rating Elo inicial
+ELO_INICIAL = 1500
