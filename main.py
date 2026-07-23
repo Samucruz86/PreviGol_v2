@@ -1,26 +1,34 @@
 """
-PreviGol v2.1
+PreviGol v2.3
 Sistema de previsão de golos
 """
 
 from previsao.motor import gerar_previsao
 from previsao.gerador_diario import gerar_previsoes_diarias
+from previsao.processar_avaliacoes import avaliar_jogo
+from previsao.estatisticas_modelo import obter_estatisticas
+from previsao.aprendizagem import analisar_desempenho
+
 
 
 def menu():
 
     while True:
 
-        print("\n====================")
-        print("      PreviGol v2.1")
-        print("====================")
+        print("\n==========================")
+        print("       PreviGol v2.3")
+        print("==========================")
 
         print("1 - Gerar previsão manual")
         print("2 - Gerar previsões do dia")
-        print("3 - Sair")
+        print("3 - Avaliar resultado de jogo")
+        print("4 - Estatísticas do modelo")
+        print("5 - Aprendizagem do modelo")
+        print("6 - Sair")
 
 
         opcao = input("\nEscolha uma opção: ")
+
 
 
         if opcao == "1":
@@ -48,14 +56,86 @@ def menu():
 
         elif opcao == "3":
 
-            print("A terminar PreviGol...")
+            previsao_id = int(
+                input("ID da previsão: ")
+            )
+
+            resultado_real = input(
+                "Resultado real (ex: 2-1): "
+            )
+
+
+            resultado = avaliar_jogo(
+                previsao_id,
+                resultado_real
+            )
+
+
+            print("\nAVALIAÇÃO")
+            print(resultado)
+
+
+
+        elif opcao == "4":
+
+            dados = obter_estatisticas()
+
+
+            print("\nESTATÍSTICAS DO MODELO")
+            print("======================")
+
+            print(
+                "Total avaliações:",
+                dados["total_avaliacoes"]
+            )
+
+            print(
+                "Resultado exato:",
+                dados["resultado_exato"],
+                "%"
+            )
+
+            print(
+                "Over 1.5:",
+                dados["over15"],
+                "%"
+            )
+
+            print(
+                "Over 2.5:",
+                dados["over25"],
+                "%"
+            )
+
+            print(
+                "Ambas marcam:",
+                dados["ambas_marcam"],
+                "%"
+            )
+
+
+
+        elif opcao == "5":
+
+            analisar_desempenho()
+
+
+
+        elif opcao == "6":
+
+            print(
+                "A terminar PreviGol..."
+            )
+
             break
 
 
 
         else:
 
-            print("Opção inválida.")
+            print(
+                "Opção inválida."
+            )
 
 
 
