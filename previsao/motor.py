@@ -1,6 +1,6 @@
 """
 Motor principal de previsão
-PreviGol v2.1
+PreviGol v2.4
 """
 
 from previsao.calculo_xg import calcular_xg
@@ -8,6 +8,8 @@ from previsao.modelo_poisson import analisar_resultados
 from previsao.mercados import calcular_mercados
 from previsao.avaliacao import avaliar_previsao
 from previsao.analise import analisar_previsao
+from previsao.aprendizagem_pesos import carregar_pesos
+
 
 from database.repositorio import (
     obter_estatisticas_equipa,
@@ -26,33 +28,73 @@ def calcular_confianca(
     forma_fora
 ):
     """
-    Calcula nível de confiança da previsão.
+    Calcula nível de confiança adaptativo.
     """
+
+    pesos = carregar_pesos()
+
+
+    if not pesos:
+
+        pesos = {
+
+            "resultado": 0.5,
+            "over15": 0.5,
+            "over25": 0.5,
+            "ambas": 0.5
+
+        }
+
 
     xg_total = xg_casa + xg_fora
 
+
     confianca = (
 
-        mercados["over25"] * 0.40
+        mercados["over25"]
+        *
+        0.40
+        *
+        pesos["over25"]
+
 
         +
 
-        mercados["ambas_marcam"] * 0.30
+        mercados["ambas_marcam"]
+        *
+        0.30
+        *
+        pesos["ambas"]
+
 
         +
 
-        min(xg_total * 10, 100) * 0.20
+        min(
+            xg_total * 10,
+            100
+        )
+        *
+        0.20
+
 
         +
 
-        ((forma_casa + forma_fora) / 2) * 0.10
+        (
+            (forma_casa + forma_fora)
+            /
+            2
+        )
+        *
+        0.10
 
     )
+
 
     return round(
         min(confianca, 100),
         2
     )
+
 
 
 
@@ -75,31 +117,27 @@ def gerar_previsao(
     equipa_casa,
     equipa_fora
 ):
+
     """
     Gera previsão automática.
     """
 
-
-
-    # Verifica se já existe previsão
 
     if previsao_existente(
         equipa_casa,
         equipa_fora
     ):
 
+
         print(
             f"Previsão já existente: {equipa_casa} vs {equipa_fora}"
         )
 
 
-        previsao_antiga = obter_previsao_existente(
+        return obter_previsao_existente(
             equipa_casa,
             equipa_fora
         )
-
-
-        return previsao_antiga
 
 
 
@@ -118,11 +156,17 @@ def gerar_previsao(
         equipa_fora
     )
 
+
+
     print("DEBUG DADOS CASA")
     print(dados_casa)
 
+
     print("DEBUG DADOS FORA")
     print(dados_fora)
+
+
+
 
     xg = calcular_xg(
 
@@ -154,9 +198,12 @@ def gerar_previsao(
     )
 
 
+
     print("DEBUG XG ANTES POISSON:")
     print(xg_casa)
     print(xg_fora)
+
+
 
     resultado = analisar_resultados(
 
@@ -195,6 +242,7 @@ def gerar_previsao(
 
 
     previsao = {
+
 
         "equipa_casa":
             equipa_casa,
@@ -240,7 +288,7 @@ def gerar_previsao(
             mercados["over35"],
 
 
-        "ambas_marcam":
+        "ambas_marcaram":
             mercados["ambas_marcam"],
 
 
@@ -257,7 +305,6 @@ def gerar_previsao(
 
 
 
-    # Avaliação automática
 
     previsao.update(
 
@@ -269,8 +316,6 @@ def gerar_previsao(
 
 
 
-    # Análise do mercado recomendado
-
     previsao["analise"] = analisar_previsao(
 
         previsao
@@ -278,8 +323,6 @@ def gerar_previsao(
     )
 
 
-
-    # Guardar previsão na BD
 
     guardar_previsao(
 
@@ -301,9 +344,9 @@ if __name__ == "__main__":
 
     resultado = gerar_previsao(
 
-        "Sporting",
+        "Benfica",
 
-        "Porto"
+        "Braga"
 
     )
 
