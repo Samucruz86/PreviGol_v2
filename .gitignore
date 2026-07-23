@@ -1,16 +1,28 @@
-# Bases de dados SQLite
+# Base de dados SQLite
 data/*.db
+*.db-journal
 
-# Ficheiros temporários Python
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
 
 # Ambientes virtuais
 venv/
+.venv/
+
+# Variáveis de ambiente
 .env
 
-# Ficheiros do sistema
+# VS Code
+.vscode/
+
+# Sistema operativo
 .DS_Store
+Thumbs.db
 
 # Logs
 *.log
+
+# Cache
+.pytest_cache/
+.mypy_cache/

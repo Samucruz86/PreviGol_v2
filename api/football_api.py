@@ -1,6 +1,12 @@
 """
-Ligação à API-Football
-PreviGol v0.7.2
+Ligação API-Football
+PreviGol v2.2
+
+Responsável por:
+- testar ligação API
+- obter jogos por data
+- obter jogos por liga
+- preparar dados para o atualizador
 """
 
 import os
@@ -8,7 +14,7 @@ import sys
 import requests
 
 
-# Permite importar ficheiros da raiz do projeto
+# Permite importar config a partir da raiz do projeto
 
 BASE_DIR = os.path.dirname(
     os.path.dirname(
@@ -23,24 +29,35 @@ from config import API
 
 
 
-def testar_ligacao():
+def criar_headers():
     """
-    Testa a ligação à API-Football.
+    Cria cabeçalhos da API.
     """
 
-    url = API["url"] + "/status"
+    return {
 
-
-    headers = {
-
-        "x-apisports-key": API["key"]
+        "x-apisports-key":
+            API["key"]
 
     }
 
 
+
+def testar_ligacao():
+    """
+    Testa estado da conta API.
+    """
+
+    url = (
+        API["url"]
+        +
+        "/status"
+    )
+
+
     resposta = requests.get(
         url,
-        headers=headers
+        headers=criar_headers()
     )
 
 
@@ -48,53 +65,184 @@ def testar_ligacao():
 
 
 
-def obter_jogos(data):
+def obter_jogos_data(
+    data
+):
     """
-    Obtém jogos de uma determinada data.
+    Obtém todos os jogos de uma data.
     """
 
-    url = API["url"] + "/fixtures"
-
-
-    headers = {
-
-        "x-apisports-key": API["key"]
-
-    }
+    url = (
+        API["url"]
+        +
+        "/fixtures"
+    )
 
 
     parametros = {
 
-        "date": data
+        "date":
+            data
 
     }
 
 
     resposta = requests.get(
+
         url,
-        headers=headers,
+
+        headers=criar_headers(),
+
         params=parametros
+
     )
 
 
     return resposta.json()
+
+
+
+def obter_jogos_liga(
+    liga,
+    temporada
+):
+    """
+    Obtém jogos de uma liga
+    numa determinada época.
+    """
+
+    url = (
+        API["url"]
+        +
+        "/fixtures"
+    )
+
+
+    parametros = {
+
+        "league":
+            liga,
+
+        "season":
+            temporada
+
+    }
+
+
+    resposta = requests.get(
+
+        url,
+
+        headers=criar_headers(),
+
+        params=parametros
+
+    )
+
+
+    return resposta.json()
+
+
+
+def obter_proximos_jogos_liga(
+    liga,
+    temporada
+):
+    """
+    Obtém próximos jogos de uma liga.
+    """
+
+    url = (
+        API["url"]
+        +
+        "/fixtures"
+    )
+
+
+    parametros = {
+
+        "league":
+            liga,
+
+        "season":
+            temporada,
+
+        "next":
+            20
+
+    }
+
+
+    resposta = requests.get(
+
+        url,
+
+        headers=criar_headers(),
+
+        params=parametros
+
+    )
+
+
+    return resposta.json()
+
+
+
+def contar_resultados(
+    resposta
+):
+
+    if not resposta:
+
+        return 0
+
+
+    if "response" not in resposta:
+
+        return 0
+
+
+    return len(
+        resposta["response"]
+    )
+
+
 
 
 
 if __name__ == "__main__":
 
 
-    print("Teste de ligação API:")
-    
-    estado = testar_ligacao()
-
-    print(estado)
-
-
-    print("\nJogos do dia:")
-
-    jogos = obter_jogos(
-        "2026-07-21"
+    print(
+        "\n=========================="
     )
 
-    print(jogos)
+    print(
+        " TESTE ÉPOCAS PORTUGAL"
+    )
+
+    print(
+        "==========================\n"
+    )
+
+
+    for temporada in range(2022, 2027):
+
+
+        jogos = obter_jogos_liga(
+
+            94,
+
+            temporada
+
+        )
+
+
+        total = contar_resultados(
+            jogos
+        )
+
+
+        print(
+            f"Época {temporada}: {total} jogos"
+        )

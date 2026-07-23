@@ -1,6 +1,6 @@
 """
-Repositório de dados PreviGol v2
-Gestão de consultas à base de dados
+Repositório de acesso à base de dados
+PreviGol v2.9
 """
 
 from database.db import ligar_bd
@@ -8,98 +8,160 @@ from database.db import ligar_bd
 
 
 def obter_estatisticas_equipa(equipa):
-    """
-    Obtém estatísticas de uma equipa.
-    """
 
     conn = ligar_bd()
     cursor = conn.cursor()
 
+
+    # Pesquisa exata
+
     cursor.execute(
         """
         SELECT
+
+            jogos,
+
             golos_marcados,
+
             golos_sofridos,
+
             media_casa,
+
             media_fora,
+
+            forma,
+
             media_marcados_casa,
+
             media_sofridos_casa,
+
             media_marcados_fora,
-            media_sofridos_fora,
-            forma
+
+            media_sofridos_fora
+
         FROM estatisticas_equipas
+
         WHERE equipa = ?
+
         """,
         (equipa,)
     )
 
+
     dados = cursor.fetchone()
+
+
+
+    # Pesquisa aproximada
+
+    if not dados:
+
+        cursor.execute(
+            """
+            SELECT
+
+                jogos,
+
+                golos_marcados,
+
+                golos_sofridos,
+
+                media_casa,
+
+                media_fora,
+
+                forma,
+
+                media_marcados_casa,
+
+                media_sofridos_casa,
+
+                media_marcados_fora,
+
+                media_sofridos_fora
+
+            FROM estatisticas_equipas
+
+            WHERE equipa LIKE ?
+
+            LIMIT 1
+
+            """,
+            (
+                f"%{equipa}%",
+            )
+        )
+
+
+        dados = cursor.fetchone()
+
+
 
     conn.close()
 
 
-    if dados:
+
+    # Equipa inexistente
+
+    if not dados:
 
         return {
 
-            "golos_marcados":
-                dados[0],
+            "jogos": 0,
 
-            "golos_sofridos":
-                dados[1],
+            "golos_marcados": 1.5,
 
-            "media_casa":
-                dados[2],
+            "golos_sofridos": 1.2,
 
-            "media_fora":
-                dados[3],
+            "media_casa": 1.5,
 
-            "media_marcados_casa":
-                dados[4],
+            "media_fora": 1.2,
 
-            "media_sofridos_casa":
-                dados[5],
+            "forma": 3,
 
-            "media_marcados_fora":
-                dados[6],
+            "media_marcados_casa": 1.5,
 
-            "media_sofridos_fora":
-                dados[7],
+            "media_sofridos_casa": 1.2,
 
-            "forma":
-                dados[8]
+            "media_marcados_fora": 1.2,
+
+            "media_sofridos_fora": 1.5
 
         }
 
 
-    # Valores neutros caso não exista equipa
 
     return {
 
-        "golos_marcados": 1.5,
+        "jogos": dados[0],
 
-        "golos_sofridos": 1.2,
+        "golos_marcados": dados[1],
 
-        "media_casa": 1.5,
+        "golos_sofridos": dados[2],
 
-        "media_fora": 1.2,
+        "media_casa": dados[3],
 
-        "media_marcados_casa": 1.5,
+        "media_fora": dados[4],
 
-        "media_sofridos_casa": 1.2,
+        "forma": dados[5],
 
-        "media_marcados_fora": 1.2,
+        "media_marcados_casa": dados[6],
 
-        "media_sofridos_fora": 1.5,
+        "media_sofridos_casa": dados[7],
 
-        "forma": 5
+        "media_marcados_fora": dados[8],
+
+        "media_sofridos_fora": dados[9]
 
     }
 
-    
-def obter_ultimos_jogos(equipa, limite=5):
+
+
+
+def obter_media_liga():
+
     """
-    Obtém últimos jogos de uma equipa.
+    Calcula média global de golos da liga.
     """
 
     conn = ligar_bd()
@@ -109,38 +171,44 @@ def obter_ultimos_jogos(equipa, limite=5):
     cursor.execute(
         """
         SELECT
-            equipa_casa,
-            equipa_fora,
-            golos_casa,
-            golos_fora,
-            data
+
+            AVG(golos_casa),
+
+            AVG(golos_fora)
+
         FROM jogos
-        WHERE equipa_casa = ?
-        OR equipa_fora = ?
-        ORDER BY data DESC
-        LIMIT ?
-        """,
-        (
-            equipa,
-            equipa,
-            limite
-        )
+
+        WHERE estado IN ('FT','AET','PEN')
+
+        """
     )
 
 
-    jogos = cursor.fetchall()
+    dados = cursor.fetchone()
+
 
     conn.close()
 
 
-    return jogos
+
+    if not dados or not dados[0]:
+
+        return 1.45
+
+
+
+    return round(
+
+        (dados[0] + dados[1]) / 2,
+
+        2
+
+    )
+
 
 
 
 def guardar_previsao(previsao):
-    """
-    Guarda uma previsão na base de dados.
-    """
 
     conn = ligar_bd()
     cursor = conn.cursor()
@@ -150,35 +218,53 @@ def guardar_previsao(previsao):
         """
         INSERT INTO previsoes
         (
+
             equipa_casa,
+
             equipa_fora,
+
             xg_casa,
+
             xg_fora,
+
             resultado_previsto,
+
             over15,
+
             over25,
+
             ambas_marcam,
-            confianca,
-            mercado_recomendado,
-            probabilidade_mercado,
-            comentario_analise
+
+            confianca
+
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+
         """,
+
         (
+
             previsao["equipa_casa"],
+
             previsao["equipa_fora"],
+
             previsao["xg_casa"],
+
             previsao["xg_fora"],
+
             previsao["resultado_previsto"],
+
             previsao["over15"],
+
             previsao["over25"],
+
             previsao["ambas_marcam"],
-            previsao["confianca"],
-            previsao["analise"]["mercado"],
-            previsao["analise"]["probabilidade"],
-            previsao["analise"]["comentario"]
+
+            previsao["confianca"]
+
         )
+
     )
 
 
@@ -186,21 +272,42 @@ def guardar_previsao(previsao):
 
     conn.close()
 
-def previsao_ja_avaliada(previsao_id):
+
+
+
+def previsao_existente(
+    equipa_casa,
+    equipa_fora
+):
 
     conn = ligar_bd()
     cursor = conn.cursor()
 
+
     cursor.execute(
         """
         SELECT id
-        FROM avaliacao_previsoes
-        WHERE previsao_id = ?
+
+        FROM previsoes
+
+        WHERE equipa_casa=?
+
+        AND equipa_fora=?
+
         """,
-        (previsao_id,)
+
+        (
+            equipa_casa,
+
+            equipa_fora
+
+        )
+
     )
 
+
     resultado = cursor.fetchone()
+
 
     conn.close()
 
@@ -208,10 +315,12 @@ def previsao_ja_avaliada(previsao_id):
     return resultado is not None
 
 
-def guardar_avaliacao(avaliacao):
-    """
-    Guarda a avaliação de uma previsão.
-    """
+
+
+def obter_previsao_existente(
+    equipa_casa,
+    equipa_fora
+):
 
     conn = ligar_bd()
     cursor = conn.cursor()
@@ -219,75 +328,63 @@ def guardar_avaliacao(avaliacao):
 
     cursor.execute(
         """
-        INSERT INTO avaliacao_previsoes
-        (
-            previsao_id,
-            resultado_real,
-            acertou,
-            acertou_over15,
-            acertou_over25,
-            acertou_ambas
-        )
-        VALUES (?, ?, ?, ?, ?, ?)
-        """,
-        (
-            avaliacao["previsao_id"],
-            avaliacao["resultado_real"],
-            avaliacao["acertou"],
-            avaliacao["acertou_over15"],
-            avaliacao["acertou_over25"],
-            avaliacao["acertou_ambas"]
-        )
-    )
+        SELECT *
 
-
-    conn.commit()
-    conn.close()
-
-def obter_previsoes_pendentes():
-    """
-    Obtém previsões ainda sem avaliação.
-    """
-
-    conn = ligar_bd()
-    cursor = conn.cursor()
-
-    cursor.execute(
-        """
-        SELECT
-            id,
-            equipa_casa,
-            equipa_fora,
-            resultado_previsto,
-            over15,
-            over25,
-            ambas_marcam
         FROM previsoes
-        WHERE id NOT IN (
-            SELECT previsao_id
-            FROM avaliacao_previsoes
+
+        WHERE equipa_casa=?
+
+        AND equipa_fora=?
+
+        ORDER BY id DESC
+
+        LIMIT 1
+
+        """,
+
+        (
+            equipa_casa,
+
+            equipa_fora
+
         )
-        """
+
     )
 
-    dados = cursor.fetchall()
+
+    dados = cursor.fetchone()
+
 
     conn.close()
 
-    previsoes = []
 
-    for linha in dados:
 
-        previsoes.append(
-            {
-                "id": linha[0],
-                "equipa_casa": linha[1],
-                "equipa_fora": linha[2],
-                "resultado_previsto": linha[3],
-                "over15": linha[4],
-                "over25": linha[5],
-                "ambas_marcam": linha[6]
-            }
-        )
+    if not dados:
 
-    return previsoes
+        return None
+
+
+
+    return {
+
+        "id": dados[0],
+
+        "equipa_casa": dados[1],
+
+        "equipa_fora": dados[2],
+
+        "xg_casa": dados[3],
+
+        "xg_fora": dados[4],
+
+        "resultado_previsto": dados[5],
+
+        "over15": dados[6],
+
+        "over25": dados[7],
+
+        "ambas_marcam": dados[8],
+
+        "confianca": dados[9]
+
+    }

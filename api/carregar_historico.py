@@ -1,10 +1,11 @@
 """
-Atualizador de jogos PreviGol
-v2.2
-Sistema anti-duplicação
+Carregador histórico API-Football
+PreviGol v2.2
+
+Carrega jogos históricos para a base de dados
 """
 
-from api.football_api import obter_jogos
+from api.football_api import obter_jogos_liga
 from api.mapper import converter_lista_jogos
 
 from database.db import ligar_bd
@@ -13,7 +14,7 @@ from database.db import ligar_bd
 
 def jogo_existe(cursor, jogo):
     """
-    Verifica se o jogo já existe na base de dados.
+    Verifica se o jogo já existe na BD.
     """
 
     cursor.execute(
@@ -31,30 +32,21 @@ def jogo_existe(cursor, jogo):
         )
     )
 
-
-    resultado = cursor.fetchone()
-
-
-    return resultado is not None
-
-
+    return cursor.fetchone() is not None
 
 
 
 def guardar_jogos(jogos):
     """
-    Guarda apenas jogos novos.
+    Guarda jogos evitando duplicados.
     """
 
     conn = ligar_bd()
-
     cursor = conn.cursor()
 
 
-    adicionados = 0
-
-    ignorados = 0
-
+    novos = 0
+    existentes = 0
 
 
     for jogo in jogos:
@@ -62,7 +54,7 @@ def guardar_jogos(jogos):
 
         if jogo_existe(cursor, jogo):
 
-            ignorados += 1
+            existentes += 1
 
             continue
 
@@ -94,7 +86,7 @@ def guardar_jogos(jogos):
         )
 
 
-        adicionados += 1
+        novos += 1
 
 
 
@@ -103,20 +95,42 @@ def guardar_jogos(jogos):
     conn.close()
 
 
-
-    return adicionados, ignorados
-
+    return novos, existentes
 
 
 
+def carregar_historico(
+    liga,
+    epoca
+):
 
-def atualizar_jogos(data):
-    """
-    Atualiza jogos de uma determinada data.
-    """
+    print(
+        "\n=========================="
+    )
 
-    resposta = obter_jogos(
-        data
+    print(
+        " CARREGAR HISTÓRICO"
+    )
+
+    print(
+        "=========================="
+    )
+
+
+    print(
+        f"Liga: {liga}"
+    )
+
+
+    print(
+        f"Época: {epoca}\n"
+    )
+
+
+
+    resposta = obter_jogos_liga(
+        liga,
+        epoca
     )
 
 
@@ -125,32 +139,34 @@ def atualizar_jogos(data):
     )
 
 
-    adicionados, ignorados = guardar_jogos(
-        jogos
-    )
-
-
     print(
         f"Jogos encontrados: {len(jogos)}"
     )
 
 
-    print(
-        f"Jogos novos adicionados: {adicionados}"
+    novos, existentes = guardar_jogos(
+        jogos
     )
 
 
     print(
-        f"Jogos já existentes ignorados: {ignorados}"
+        f"Jogos novos adicionados: {novos}"
     )
 
 
+    print(
+        f"Jogos já existentes: {existentes}"
+    )
 
 
 
 if __name__ == "__main__":
 
 
-    atualizar_jogos(
-        "2026-07-21"
+    carregar_historico(
+
+        94,
+
+        2024
+
     )

@@ -1,6 +1,6 @@
 """
 Atualização de estatísticas das equipas
-PreviGol v0.9.0
+PreviGol v2.2
 """
 
 from database.db import ligar_bd
@@ -30,25 +30,20 @@ def atualizar_estatisticas():
     equipas = {}
 
 
+
     for casa, fora, gc, gf in jogos:
 
 
         if casa not in equipas:
 
             equipas[casa] = {
-
-                "jogos": 0,
-
-                "marcados": 0,
-
-                "sofridos": 0,
-
-                "marcados_casa": [],
-                "sofridos_casa": [],
-
-                "marcados_fora": [],
-                "sofridos_fora": []
-
+                "jogos":0,
+                "marcados":0,
+                "sofridos":0,
+                "casa_marcados":[],
+                "casa_sofridos":[],
+                "fora_marcados":[],
+                "fora_sofridos":[]
             }
 
 
@@ -56,24 +51,18 @@ def atualizar_estatisticas():
         if fora not in equipas:
 
             equipas[fora] = {
-
-                "jogos": 0,
-
-                "marcados": 0,
-
-                "sofridos": 0,
-
-                "marcados_casa": [],
-                "sofridos_casa": [],
-
-                "marcados_fora": [],
-                "sofridos_fora": []
-
+                "jogos":0,
+                "marcados":0,
+                "sofridos":0,
+                "casa_marcados":[],
+                "casa_sofridos":[],
+                "fora_marcados":[],
+                "fora_sofridos":[]
             }
 
 
 
-        # equipa da casa
+        # Casa
 
         equipas[casa]["jogos"] += 1
 
@@ -82,13 +71,13 @@ def atualizar_estatisticas():
         equipas[casa]["sofridos"] += gf
 
 
-        equipas[casa]["marcados_casa"].append(gc)
+        equipas[casa]["casa_marcados"].append(gc)
 
-        equipas[casa]["sofridos_casa"].append(gf)
+        equipas[casa]["casa_sofridos"].append(gf)
 
 
 
-        # equipa visitante
+        # Fora
 
         equipas[fora]["jogos"] += 1
 
@@ -97,116 +86,105 @@ def atualizar_estatisticas():
         equipas[fora]["sofridos"] += gc
 
 
-        equipas[fora]["marcados_fora"].append(gf)
+        equipas[fora]["fora_marcados"].append(gf)
 
-        equipas[fora]["sofridos_fora"].append(gc)
+        equipas[fora]["fora_sofridos"].append(gc)
 
 
 
-    for equipa, dados in equipas.items():
+    for equipa,dados in equipas.items():
 
 
         media_marcados_casa = (
-            sum(dados["marcados_casa"]) /
-            len(dados["marcados_casa"])
-            if dados["marcados_casa"]
+            sum(dados["casa_marcados"]) /
+            len(dados["casa_marcados"])
+            if dados["casa_marcados"]
             else 0
         )
 
 
         media_sofridos_casa = (
-            sum(dados["sofridos_casa"]) /
-            len(dados["sofridos_casa"])
-            if dados["sofridos_casa"]
+            sum(dados["casa_sofridos"]) /
+            len(dados["casa_sofridos"])
+            if dados["casa_sofridos"]
             else 0
         )
 
 
         media_marcados_fora = (
-            sum(dados["marcados_fora"]) /
-            len(dados["marcados_fora"])
-            if dados["marcados_fora"]
+            sum(dados["fora_marcados"]) /
+            len(dados["fora_marcados"])
+            if dados["fora_marcados"]
             else 0
         )
 
 
         media_sofridos_fora = (
-            sum(dados["sofridos_fora"]) /
-            len(dados["sofridos_fora"])
-            if dados["sofridos_fora"]
+            sum(dados["fora_sofridos"]) /
+            len(dados["fora_sofridos"])
+            if dados["fora_sofridos"]
             else 0
+        )
+
+
+        forma = round(
+            (dados["marcados"] + 1) /
+            (dados["sofridos"] + 1),
+            2
         )
 
 
 
         cursor.execute("""
-            INSERT INTO estatisticas_equipas
-            (
-                equipa,
-                jogos,
-                golos_marcados,
-                golos_sofridos,
-                media_casa,
-                media_fora,
-                media_marcados_casa,
-                media_sofridos_casa,
-                media_marcados_fora,
-                media_sofridos_fora,
-                forma
-            )
+        INSERT INTO estatisticas_equipas
+        (
+            equipa,
+            jogos,
+            golos_marcados,
+            golos_sofridos,
+            media_casa,
+            media_fora,
+            media_marcados_casa,
+            media_sofridos_casa,
+            media_marcados_fora,
+            media_sofridos_fora,
+            forma
+        )
 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?)
 
+        ON CONFLICT(equipa)
 
-            ON CONFLICT(equipa)
+        DO UPDATE SET
 
-            DO UPDATE SET
-
-                jogos=excluded.jogos,
-
-                golos_marcados=excluded.golos_marcados,
-
-                golos_sofridos=excluded.golos_sofridos,
-
-                media_casa=excluded.media_casa,
-
-                media_fora=excluded.media_fora,
-
-                media_marcados_casa=
-                    excluded.media_marcados_casa,
-
-                media_sofridos_casa=
-                    excluded.media_sofridos_casa,
-
-                media_marcados_fora=
-                    excluded.media_marcados_fora,
-
-                media_sofridos_fora=
-                    excluded.media_sofridos_fora
+        jogos=excluded.jogos,
+        golos_marcados=excluded.golos_marcados,
+        golos_sofridos=excluded.golos_sofridos,
+        media_casa=excluded.media_casa,
+        media_fora=excluded.media_fora,
+        media_marcados_casa=excluded.media_marcados_casa,
+        media_sofridos_casa=excluded.media_sofridos_casa,
+        media_marcados_fora=excluded.media_marcados_fora,
+        media_sofridos_fora=excluded.media_sofridos_fora,
+        forma=excluded.forma
 
         """,
         (
             equipa,
-
             dados["jogos"],
-
             dados["marcados"],
-
             dados["sofridos"],
 
             media_marcados_casa,
-
             media_marcados_fora,
 
             media_marcados_casa,
-
             media_sofridos_casa,
 
             media_marcados_fora,
-
             media_sofridos_fora,
 
-            0
+            forma
         ))
 
 
