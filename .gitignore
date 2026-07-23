@@ -33,3 +33,9 @@ Thumbs.db
 # Python
 __pycache__/
 *.pyc
+
+# Bases de dados locais
+data/*.db
+
+# Guardar pesos do modelo
+!data/pesos_modelo.json
