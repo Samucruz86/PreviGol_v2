@@ -473,3 +473,70 @@ def guardar_avaliacao(avaliacao):
 
     conn.commit()
     conn.close()
+
+def obter_historico_previsoes():
+
+    conn = ligar_bd()
+    cursor = conn.cursor()
+
+
+    cursor.execute(
+        """
+        SELECT
+
+            p.id,
+
+            p.equipa_casa,
+
+            p.equipa_fora,
+
+            p.resultado_previsto,
+
+            a.resultado_real,
+
+            a.acertou
+
+        FROM previsoes p
+
+        LEFT JOIN avaliacao_previsoes a
+
+            ON p.id = a.previsao_id
+
+        ORDER BY p.id
+        """
+    )
+
+
+    dados = cursor.fetchall()
+
+
+    conn.close()
+
+
+    historico = []
+
+
+    for linha in dados:
+
+        historico.append(
+
+            {
+
+                "id": linha[0],
+
+                "equipa_casa": linha[1],
+
+                "equipa_fora": linha[2],
+
+                "resultado_previsto": linha[3],
+
+                "resultado_real": linha[4],
+
+                "acertou": linha[5]
+
+            }
+
+        )
+
+
+    return historico
