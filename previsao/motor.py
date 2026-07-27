@@ -22,13 +22,15 @@ from database.repositorio import (
 
 def calcular_confianca(
     mercados,
+    resultado,
     xg_casa,
     xg_fora,
     forma_casa,
     forma_fora
 ):
     """
-    Calcula nível de confiança adaptativo.
+    Calcula nível de confiança adaptativo
+    usando os pesos aprendidos.
     """
 
     pesos = carregar_pesos()
@@ -51,9 +53,27 @@ def calcular_confianca(
 
     confianca = (
 
+        resultado["vitoria_casa"]
+        *
+        0.25
+        *
+        pesos["resultado"]
+
+
+        +
+
+        mercados["over15"]
+        *
+        0.25
+        *
+        pesos["over15"]
+
+
+        +
+
         mercados["over25"]
         *
-        0.40
+        0.20
         *
         pesos["over25"]
 
@@ -62,7 +82,7 @@ def calcular_confianca(
 
         mercados["ambas_marcam"]
         *
-        0.30
+        0.20
         *
         pesos["ambas"]
 
@@ -74,7 +94,7 @@ def calcular_confianca(
             100
         )
         *
-        0.20
+        0.05
 
 
         +
@@ -85,7 +105,7 @@ def calcular_confianca(
             2
         )
         *
-        0.10
+        0.05
 
     )
 
@@ -167,7 +187,6 @@ def gerar_previsao(
 
 
 
-
     xg = calcular_xg(
 
         dados_casa["media_marcados_casa"],
@@ -229,6 +248,8 @@ def gerar_previsao(
 
         mercados,
 
+        resultado,
+
         xg_casa,
 
         xg_fora,
@@ -288,7 +309,7 @@ def gerar_previsao(
             mercados["over35"],
 
 
-        "ambas_marcaram":
+        "ambas_marcam":
             mercados["ambas_marcam"],
 
 
@@ -302,7 +323,6 @@ def gerar_previsao(
             )
 
     }
-
 
 
 
@@ -346,7 +366,7 @@ if __name__ == "__main__":
 
         "Benfica",
 
-        "Braga"
+        "Gil Vicente"
 
     )
 
