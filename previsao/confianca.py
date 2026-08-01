@@ -1,6 +1,6 @@
 """
 Sistema de confiança das previsões
-PreviGol v3.1
+PreviGol v3.2
 """
 
 from previsao.aprendizagem_pesos import carregar_pesos
@@ -8,14 +8,95 @@ from previsao.aprendizagem_pesos import carregar_pesos
 
 
 def limitar(valor, minimo=0, maximo=100):
-    """
-    Garante que um valor fica entre 0 e 100.
-    """
 
     return max(
         minimo,
         min(valor, maximo)
     )
+
+
+
+def calcular_consistencia(
+    mercados,
+    resultado,
+    xg_casa,
+    xg_fora
+):
+    """
+    Mede o acordo entre os indicadores.
+    Resultado entre 0 e 100.
+    """
+
+    pontos = 0
+
+
+    # Resultado forte + xG favorável
+
+    xg_total = xg_casa + xg_fora
+
+
+    if resultado["vitoria_casa"] >= 65 and xg_casa >= xg_fora:
+
+        pontos += 30
+
+
+    elif resultado["vitoria_fora"] >= 65 and xg_fora >= xg_casa:
+
+        pontos += 30
+
+
+    elif resultado["empate"] >= 45:
+
+        pontos += 20
+
+
+
+    # Mercados de golos coerentes com xG
+
+    if xg_total >= 2.8 and mercados["over15"] >= 70:
+
+        pontos += 25
+
+
+    elif xg_total >= 2.2 and mercados["over15"] >= 60:
+
+        pontos += 20
+
+
+    else:
+
+        pontos += 10
+
+
+
+    # Over 2.5 confirma tendência
+
+    if mercados["over25"] >= 60:
+
+        pontos += 20
+
+
+    elif mercados["over25"] >= 45:
+
+        pontos += 10
+
+
+
+    # Ambas marcam como indicador complementar
+
+    if mercados["ambas_marcam"] >= 55:
+
+        pontos += 15
+
+
+    elif mercados["ambas_marcam"] >= 35:
+
+        pontos += 10
+
+
+
+    return limitar(pontos)
+
 
 
 
@@ -27,12 +108,6 @@ def calcular_confianca(
     forma_casa,
     forma_fora
 ):
-    """
-    Calcula nível de confiança adaptativo.
-
-    Mantém aprendizagem dos pesos,
-    mas com escala equilibrada.
-    """
 
     pesos = carregar_pesos()
 
@@ -50,33 +125,12 @@ def calcular_confianca(
 
 
 
-    peso_resultado = pesos.get(
-        "resultado",
-        1.0
-    )
-
-    peso_over15 = pesos.get(
-        "over15",
-        1.0
-    )
-
-    peso_over25 = pesos.get(
-        "over25",
-        1.0
-    )
-
-    peso_ambas = pesos.get(
-        "ambas",
-        1.0
-    )
-
-
-
     resultado_score = (
         resultado["vitoria_casa"]
         *
-        peso_resultado
+        pesos.get("resultado", 1.0)
     )
+
 
 
     mercado_score = (
@@ -85,7 +139,7 @@ def calcular_confianca(
         *
         0.50
         *
-        peso_over15
+        pesos.get("over15", 1.0)
 
         +
 
@@ -93,7 +147,7 @@ def calcular_confianca(
         *
         0.50
         *
-        peso_over25
+        pesos.get("over25", 1.0)
 
     )
 
@@ -103,48 +157,56 @@ def calcular_confianca(
 
         mercados["ambas_marcam"]
         *
-        peso_ambas
+        pesos.get("ambas", 1.0)
 
     )
 
-
-
-    xg_total = xg_casa + xg_fora
 
 
     xg_score = limitar(
-        xg_total * 25
+        (xg_casa + xg_fora) * 25
     )
-
-
-
-    forma_media = (
-
-        forma_casa
-        +
-        forma_fora
-
-    ) / 2
 
 
 
     forma_score = limitar(
-        forma_media * 20
+
+        (
+            forma_casa
+            +
+            forma_fora
+        )
+        /
+        2
+        *
+        20
+
+    )
+
+
+
+    consistencia = calcular_consistencia(
+
+        mercados,
+        resultado,
+        xg_casa,
+        xg_fora
+
     )
 
 
 
     confianca = (
 
-        resultado_score * 0.30
+        resultado_score * 0.25
 
         +
 
-        mercado_score * 0.30
+        mercado_score * 0.25
 
         +
 
-        ambas_score * 0.15
+        ambas_score * 0.10
 
         +
 
@@ -153,6 +215,10 @@ def calcular_confianca(
         +
 
         forma_score * 0.10
+
+        +
+
+        consistencia * 0.15
 
     )
 
@@ -167,9 +233,6 @@ def calcular_confianca(
 
 
 def definir_nivel(confianca):
-    """
-    Define classificação da confiança.
-    """
 
     if confianca >= 85:
 
