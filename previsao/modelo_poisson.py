@@ -1,6 +1,6 @@
 """
-Modelo Poisson avançado
-PreviGol v2.6 compatível
+Modelo Poisson inteligente
+PreviGol v2.8
 """
 
 import math
@@ -12,8 +12,8 @@ def probabilidade_poisson(
     golos
 ):
     """
-    Probabilidade de uma equipa marcar
-    determinado número de golos.
+    Calcula a probabilidade de uma equipa
+    marcar determinado número de golos.
     """
 
     return (
@@ -29,10 +29,10 @@ def probabilidade_poisson(
 def calcular_matriz(
     xg_casa,
     xg_fora,
-    max_golos=5
+    max_golos=7
 ):
     """
-    Cria matriz completa de resultados.
+    Cria matriz de resultados usando Poisson.
     """
 
     matriz = []
@@ -42,12 +42,10 @@ def calcular_matriz(
 
         for fora in range(max_golos + 1):
 
-
             prob_casa = probabilidade_poisson(
                 xg_casa,
                 casa
             )
-
 
             prob_fora = probabilidade_poisson(
                 xg_fora,
@@ -75,7 +73,7 @@ def calcular_matriz(
                     "probabilidade":
                         round(
                             probabilidade,
-                            2
+                            4
                         )
                 }
             )
@@ -85,12 +83,91 @@ def calcular_matriz(
 
 
 
+def calcular_score_resultado(
+    resultado,
+    xg_casa,
+    xg_fora
+):
+    """
+    Score inteligente para selecionar
+    o resultado mais coerente.
+    """
+
+    probabilidade = resultado["probabilidade"]
+
+
+    golos_casa = resultado["golos_casa"]
+
+    golos_fora = resultado["golos_fora"]
+
+
+    score = probabilidade
+
+
+
+    diferenca_xg = xg_casa - xg_fora
+
+
+    diferenca_golos = (
+        golos_casa
+        -
+        golos_fora
+    )
+
+
+    if diferenca_xg > 1:
+
+        if diferenca_golos > 1:
+            score += 2
+
+
+        if diferenca_golos < 0:
+            score -= 3
+
+
+
+    elif diferenca_xg < -1:
+
+        if diferenca_golos < -1:
+            score += 2
+
+
+        if diferenca_golos > 0:
+            score -= 3
+
+
+
+    if (
+        golos_casa == 0
+        and
+        golos_fora == 0
+    ):
+
+        score -= 2
+
+
+
+    if (
+        golos_casa == golos_fora
+        and
+        abs(diferenca_xg) > 1
+    ):
+
+        score -= 3
+
+
+
+    return score
+
+
+
 def analisar_resultados(
     xg_casa,
     xg_fora
 ):
     """
-    Analisa vencedor e resultado provável.
+    Analisa resultado provável,
+    vencedor e probabilidades.
     """
 
     matriz = calcular_matriz(
@@ -99,16 +176,28 @@ def analisar_resultados(
     )
 
 
+    for resultado in matriz:
+
+        resultado["score"] = calcular_score_resultado(
+            resultado,
+            xg_casa,
+            xg_fora
+        )
+
+
     matriz.sort(
         key=lambda x:
-        x["probabilidade"],
+        x["score"],
         reverse=True
     )
 
 
     casa = 0
+
     empate = 0
+
     fora = 0
+
 
 
     for resultado in matriz:
@@ -139,7 +228,10 @@ def analisar_resultados(
 
 
         "probabilidade_resultado":
-            matriz[0]["probabilidade"],
+            round(
+                matriz[0]["probabilidade"],
+                2
+            ),
 
 
         "melhores_resultados":
@@ -147,14 +239,23 @@ def analisar_resultados(
 
 
         "vitoria_casa":
-            round(casa, 2),
+            round(
+                casa,
+                2
+            ),
 
 
         "empate":
-            round(empate, 2),
+            round(
+                empate,
+                2
+            ),
 
 
         "vitoria_fora":
-            round(fora, 2)
+            round(
+                fora,
+                2
+            )
 
     }
