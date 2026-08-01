@@ -169,18 +169,24 @@ def calcular_confianca(
 
 
 
+    forma_media = (
+
+        forma_casa
+        +
+        forma_fora
+    ) / 2
+
+
     forma_score = limitar(
 
+        50
+        +
         (
-            forma_casa
-            +
-            forma_fora
-        )
-        /
-        2
-        *
-        20
 
+            (forma_media - 1)
+        *
+        25
+        )
     )
 
 
