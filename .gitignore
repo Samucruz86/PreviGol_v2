@@ -39,3 +39,5 @@ data/*.db
 
 # Guardar pesos do modelo
 !data/pesos_modelo.json
+
+backups/
