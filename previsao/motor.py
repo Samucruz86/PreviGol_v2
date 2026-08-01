@@ -1,6 +1,6 @@
 """
 Motor principal de previsão
-PreviGol v2.4
+PreviGol v3.0
 """
 
 from previsao.calculo_xg import calcular_xg
@@ -8,7 +8,11 @@ from previsao.modelo_poisson import analisar_resultados
 from previsao.mercados import calcular_mercados
 from previsao.avaliacao import avaliar_previsao
 from previsao.analise import analisar_previsao
-from previsao.aprendizagem_pesos import carregar_pesos
+
+from previsao.confianca import (
+    calcular_confianca,
+    definir_nivel
+)
 
 
 from database.repositorio import (
@@ -17,119 +21,6 @@ from database.repositorio import (
     previsao_existente,
     obter_previsao_existente
 )
-
-
-
-def calcular_confianca(
-    mercados,
-    resultado,
-    xg_casa,
-    xg_fora,
-    forma_casa,
-    forma_fora
-):
-    """
-    Calcula nível de confiança adaptativo
-    usando os pesos aprendidos.
-    """
-
-    pesos = carregar_pesos()
-
-
-    if not pesos:
-
-        pesos = {
-
-            "resultado": 0.5,
-            "over15": 0.5,
-            "over25": 0.5,
-            "ambas": 0.5
-
-        }
-
-
-    xg_total = xg_casa + xg_fora
-
-
-    confianca = (
-
-        resultado["vitoria_casa"]
-        *
-        0.25
-        *
-        pesos["resultado"]
-
-
-        +
-
-        mercados["over15"]
-        *
-        0.25
-        *
-        pesos["over15"]
-
-
-        +
-
-        mercados["over25"]
-        *
-        0.20
-        *
-        pesos["over25"]
-
-
-        +
-
-        mercados["ambas_marcam"]
-        *
-        0.20
-        *
-        pesos["ambas"]
-
-
-        +
-
-        min(
-            xg_total * 10,
-            100
-        )
-        *
-        0.05
-
-
-        +
-
-        (
-            (forma_casa + forma_fora)
-            /
-            2
-        )
-        *
-        0.05
-
-    )
-
-
-    return round(
-        min(confianca, 100),
-        2
-    )
-
-
-
-
-def definir_nivel(confianca):
-
-    if confianca >= 70:
-        return "Alta"
-
-    elif confianca >= 50:
-        return "Média"
-
-    else:
-        return "Baixa"
-
-
 
 
 
@@ -181,14 +72,14 @@ def gerar_previsao(
 
         return {
 
-        "estado": "sem_dados",
+            "estado": "sem_dados",
 
-        "equipa": equipa_casa,
+            "equipa": equipa_casa,
 
-        "mensagem":
-            "Não existem estatísticas suficientes para gerar previsão"
+            "mensagem":
+                "Não existem estatísticas suficientes para gerar previsão"
 
-       }
+        }
 
 
 
@@ -196,12 +87,12 @@ def gerar_previsao(
 
         return {
 
-        "estado": "sem_dados",
+            "estado": "sem_dados",
 
-        "equipa": equipa_fora,
+            "equipa": equipa_fora,
 
-        "mensagem":
-            "Não existem estatísticas suficientes para gerar previsão"
+            "mensagem":
+                "Não existem estatísticas suficientes para gerar previsão"
 
         }
 
@@ -232,6 +123,7 @@ def gerar_previsao(
 
     )
 
+
     xg_casa = round(
         xg["xg_casa"],
         2
@@ -248,8 +140,6 @@ def gerar_previsao(
     print("DEBUG XG ANTES POISSON:")
     print(xg_casa)
     print(xg_fora)
-
-
 
     resultado = analisar_resultados(
 
@@ -391,9 +281,9 @@ if __name__ == "__main__":
 
     resultado = gerar_previsao(
 
-        "Moreirense",
+        "Benfica",
 
-        "Famalicão"
+        "Estoril"
 
     )
 
