@@ -179,21 +179,31 @@ def gerar_previsao(
 
     if not dados_casa["dados_validos"]:
 
-        print(
-            f"Sem dados suficientes para a equipa da casa: {equipa_casa}"
-        )
+        return {
 
-        return None
+        "estado": "sem_dados",
+
+        "equipa": equipa_casa,
+
+        "mensagem":
+            "Não existem estatísticas suficientes para gerar previsão"
+
+       }
 
 
 
     if not dados_fora["dados_validos"]:
 
-        print(
-            f"Sem dados suficientes para a equipa visitante: {equipa_fora}"
-        )
+        return {
 
-        return None
+        "estado": "sem_dados",
+
+        "equipa": equipa_fora,
+
+        "mensagem":
+            "Não existem estatísticas suficientes para gerar previsão"
+
+        }
 
 
 
@@ -381,9 +391,9 @@ if __name__ == "__main__":
 
     resultado = gerar_previsao(
 
-        "Benfica",
+        "Moreirense",
 
-        "Braga"
+        "Famalicão"
 
     )
 
