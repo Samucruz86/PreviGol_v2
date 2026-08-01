@@ -198,7 +198,7 @@ def calcular_confianca(
 
     confianca = (
 
-        resultado_score * 0.25
+        resultado_score * 0.30
 
         +
 
@@ -206,7 +206,7 @@ def calcular_confianca(
 
         +
 
-        ambas_score * 0.10
+        ambas_score * 0.05
 
         +
 
@@ -218,7 +218,7 @@ def calcular_confianca(
 
         +
 
-        consistencia * 0.15
+        consistencia * 0.20
 
     )
 
