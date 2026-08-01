@@ -75,31 +75,48 @@ def obter_estatisticas_equipa(equipa):
 
         return {
 
+            "dados_validos": False,
+
             "jogos": 0,
-            "golos_marcados": 1.5,
-            "golos_sofridos": 1.2,
-            "media_casa": 1.5,
-            "media_fora": 1.2,
-            "forma": 3,
-            "media_marcados_casa": 1.5,
-            "media_sofridos_casa": 1.2,
-            "media_marcados_fora": 1.2,
-            "media_sofridos_fora": 1.5
+            "golos_marcados": 0,
+            "golos_sofridos": 0,
+
+            "media_casa": 0,
+            "media_fora": 0,
+
+            "forma": 0,
+
+            "media_marcados_casa": 0,
+            "media_sofridos_casa": 0,
+
+            "media_marcados_fora": 0,
+            "media_sofridos_fora": 0
 
         }
 
 
     return {
 
+        "dados_validos": True,
+
         "jogos": dados[0],
+
         "golos_marcados": dados[1],
+
         "golos_sofridos": dados[2],
+
         "media_casa": dados[3],
+
         "media_fora": dados[4],
+
         "forma": dados[5],
+
         "media_marcados_casa": dados[6],
+
         "media_sofridos_casa": dados[7],
+
         "media_marcados_fora": dados[8],
+
         "media_sofridos_fora": dados[9]
 
     }

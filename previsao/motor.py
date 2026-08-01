@@ -177,6 +177,25 @@ def gerar_previsao(
     )
 
 
+    if not dados_casa["dados_validos"]:
+
+        print(
+            f"Sem dados suficientes para a equipa da casa: {equipa_casa}"
+        )
+
+        return None
+
+
+
+    if not dados_fora["dados_validos"]:
+
+        print(
+            f"Sem dados suficientes para a equipa visitante: {equipa_fora}"
+        )
+
+        return None
+
+
 
     print("DEBUG DADOS CASA")
     print(dados_casa)
@@ -202,8 +221,6 @@ def gerar_previsao(
         dados_fora["forma"]
 
     )
-
-
 
     xg_casa = round(
         xg["xg_casa"],
@@ -364,9 +381,9 @@ if __name__ == "__main__":
 
     resultado = gerar_previsao(
 
-        "Estoril",
+        "Benfica",
 
-        "Casa Pia"
+        "Braga"
 
     )
 
